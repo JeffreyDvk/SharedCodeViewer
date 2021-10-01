@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="fr"> 
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width , initial-scale=1.0">
+        <script src="md/codemirror/lib/codemirror.js"></script>
+        <link rel="stylesheet" type="text/css" href="md/codemirror/lib/codemirror.css">
+        <script src="md/codemirror/mode/htmlmixed/htmlmixed.js"></script>
+        <script src="md/codemirror/mode/xml/xml.js"></script>
+        <script src="md/codemirror/mode/css/css.js"></script>
+        <script src="md/codemirror/mode/php/php.js"></script>
+        <script src="md/codemirror/mode/javascript/javascript.js"></script>
+        <link rel="stylesheet" type="text/css" href="md/codemirror/theme/ayu-dark.css">
+        <style>
+            html,body{
+                padding: 0px;
+                margin: 0px;
+            }
+            body{
+                background-image: linear-gradient(45deg,blue,rgb(255, 40, 40));
+                background-repeat: no-repeat;
+                background-position: bottom;
+                background-size:auto;
+            }
+            main{
+                display: flex;
+                width: fit-content;
+                margin: 0px auto;
+                padding: 20px 0px;
+                
+            }
+            main div h3{
+                color: white;
+                font-size: 25px;
+                font-weight: bold;
+                font-family: sans-serif;
+            }
+            main div h3,.CodeMirror{
+                margin: 0px 10px !important;
+            }
+            .CodeMirror {
+                float: left;
+                width: 50%;
+            }
+            #result{
+                width: 98%;
+                margin: 0px 1%;
+            }
+            #result iframe{
+                width: 100%;
+                min-height: 500px;
+                border: none;
+                border-radius: 5px;
+                box-shadow: 0px 0px 15px rgba(0,0,0,0.8);
+                background-color: white;
+            }
+        </style>
+    </head>
+    <body>
+        <main>
+            <div>
+                <h3>HTML</h3>
+                <textarea class="text-zone" id="zone1"></textarea>
+            </div>
+            <div>
+                <h3>CSS</h3>
+                <textarea class="text-zone" id="zone2"></textarea>
+            </div>
+        </main>
+        <div id="result">
+            <iframe src="pages/index.html" id="preview"></iframe>
+        </div>
+        
+        
+        <footer>
+            <script type="text/javascript" src="js/jquery-3.6.0.min.js"></script>
+        </footer>
+        <script>
+            var options = {
+                mode: "htmlmixed",
+                theme: "ayu-dark",
+                lineNumbers: true,
+                autoCloseTags: true,
+                extraKeys: {
+                    "F11": function(cm) {
+                    cm.setOption("fullScreen", !cm.getOption("fullScreen"));
+                    },
+                    "Esc": function(cm) {
+                    if (cm.getOption("fullScreen")) cm.setOption("fullScreen", false);
+                    }
+                }
+            }
+            var editor1 = CodeMirror.fromTextArea( document.getElementById('zone1'),options );
+            options.mode = "css";
+            var editor2 = CodeMirror.fromTextArea( document.getElementById('zone2'),options );   
+ 
+            let editors = [editor1,editor2];
+            editors.forEach(editor=>{
+                editor.setSize("500px","400px");
+                /*editor.on("change",()=>{
+                    $.ajax({
+                        url: "pages/load.php",
+                        method:"POST",
+                        data:{
+                            action: 'save',
+                            text: editor.getValue(),
+                            id:editor.getMode().name
+                        },
+                        dataType:"json",
+                        success:function(data){}  
+                    })
+                });*/
+            });
+            setInterval(()=>{
+                let preview = document.getElementById('preview');
+                preview.src = preview.src;
+            },1000);
+
+            let refresh = (data)=>{
+                let c = editors.length;
+                for(i=0;i<c;i++){
+                    let top = window.scrollY;
+                    let left = window.scrollX;
+                    let scrollInfo = editors[i].getScrollInfo();
+                    let cursor = editors[i].getCursor();
+                    editors[i].setValue(data["text"+(i+1)]);
+                    editors[i].scrollTo(scrollInfo.left, scrollInfo.top);
+                    editors[i].setCursor(cursor.line,cursor.ch);
+                    window.scroll(left,top);
+                }
+            }
+
+
+            $(document).ready(function(){
+                $.ajax({ 
+                    url: "pages/load.php",
+                    method:"POST",
+                    data:{
+                        action: "default"
+                    },
+                    dataType:"json",
+                    context: document.body,
+                    success:function(data){
+                        refresh(data)
+                    }                      
+                });
+            });        
+            setInterval(()=>{
+                $.ajax({
+                    url: "pages/load.php",
+                    method:"POST",
+                    data:{
+                        action: 'default',
+                    },
+                    dataType:"json",
+                    success:function(data){
+                        refresh(data)
+                    }  
+                })
+            },1000);
+            
+        </script>
+    </body>
+</html>

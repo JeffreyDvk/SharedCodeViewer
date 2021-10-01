@@ -1,0 +1,31 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+.container{
+    
+}
+img{
+    width: 100px;
+    animation: agrandir 4s infinite;
+
+}
+
+@keyframes agrandir{
+    0%{
+        width: 100px;
+    }
+    20%{
+        width: 300px;
+    }
+    50%{
+        width: 150px;
+    }
+    75%{
+        width: 200px;
+    }
+    100%{
+        width: 100px;
+    }
+}
